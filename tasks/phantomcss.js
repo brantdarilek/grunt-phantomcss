@@ -226,13 +226,13 @@ module.exports = function(grunt) {
 
 
     // Verify screenshot and failure paths are absolute for slimerjs
-    new Map([['screenshots',options.screenshots],['failures',options.failures],['results',options.results]]).forEach(function(value, key){
-      if(path.isAbsolute(value)) {
-        return;
-      } else {
-        options[key] = path.resolve(value);
-      }
-    }); 
+    // new Map([['screenshots',options.screenshots],['failures',options.failures],['results',options.results]]).forEach(function(value, key){
+    //   if(path.isAbsolute(value)) {
+    //     return;
+    //   } else {
+    //     options[key] = path.resolve(value);
+    //   }
+    // }); 
 
     // Remove old diff screenshots
     options.testFolder.forEach(function(folderpath) {
