@@ -37,13 +37,9 @@ var phantomCSSPath = args.phantomCSSPath;
 phantom.casperPath = args.casperJSPath;
 phantom.injectJs(phantom.casperPath + s + 'bin' + s + 'bootstrap.js');
 
-var casper = require('casper').create({
-  viewportSize: viewportSize,
-  logLevel: args.logLevel,
-  verbose: true
-});
+var casper = require('casper').create();
 
-// Require and initialise PhantomCSS module
+// // Require and initialise PhantomCSS module
 var phantomcss = require(phantomCSSPath + s + 'phantomcss.js');
 
 phantomcss.init({

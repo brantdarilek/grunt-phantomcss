@@ -36,6 +36,7 @@ function findPath(folderName, paths) {
 
 var tmp = require('temporary');
 var phantomBinaryPath = require('phantomjs-prebuilt').path;
+var slimerBinaryPath = require('slimerjs').path;
 
 var runnerPath = path.resolve(__dirname, '..', 'phantomjs', 'runner.js');
 var phantomCSSPath = findPath('phantomcss', [
@@ -63,7 +64,8 @@ module.exports = function(grunt) {
       viewportSize: [1280, 800],
       mismatchTolerance: 0.05,
       waitTimeout: 5000, // Set timeout to wait before throwing an exception
-      logLevel: 'warning' // debug | info | warning | error
+      logLevel: 'warning', // debug | info | warning | error
+      engine: 'phantomjs' // phantomjs | slimerjs
     });
 
     // Timeout ID for message checking loop
@@ -81,6 +83,17 @@ module.exports = function(grunt) {
 
     // Create a temporary file for message passing between the task and PhantomJS
     var tempFile = new tmp.File();
+
+    // Verify which browser to use
+    var engineBinary = function() {
+
+      // Determine which engine
+      if (options.engine === 'slimerjs') {
+        return slimerBinaryPath;
+      }
+
+        return phantomBinaryPath;
+    };
 
     var deleteDiffScreenshots = function(folderpath) {
       // Find diff/fail files
@@ -210,8 +223,18 @@ module.exports = function(grunt) {
     options.tempFile = tempFile.path;
     options.phantomCSSPath = phantomCSSPath;
     options.casperJSPath = casperJSPath;
-    // Remove old diff screenshots
 
+
+    // Verify screenshot and failure paths are absolute for slimerjs
+    new Map([['screenshots',options.screenshots],['failures',options.failures],['results',options.results]]).forEach(function(value, key){
+      if(path.isAbsolute(value)) {
+        return;
+      } else {
+        options[key] = path.resolve(value);
+      }
+    }); 
+
+    // Remove old diff screenshots
     options.testFolder.forEach(function(folderpath) {
       deleteDiffScreenshots(folderpath);
       deleteDiffResults(folderpath);
@@ -220,7 +243,7 @@ module.exports = function(grunt) {
     // Start watching for messages
     checkForMessages();
     grunt.util.spawn({
-      cmd: phantomBinaryPath,
+      cmd: engineBinary(),
       args: [
         runnerPath,
         JSON.stringify(options),
